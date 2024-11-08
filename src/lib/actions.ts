@@ -13,21 +13,11 @@ import {
   attendanceSchema,
 } from "./formValidationSchema"
 
-export const createStudent = async (data: any) => {
-  // Validate data with Zod schema
-  const validationResult = memberSchema.safeParse(data);
-  if (!validationResult.success) {
-    // Return validation errors if data is invalid
-    return { error: validationResult.error.errors };
-  }
-
-  try {
-    const newStudent = await prisma.member.create({
-      data: validationResult.data,
-    });
-    return newStudent;
-  } catch (error) {
-    console.error('Error creating student:', error);
-    return { error: 'Failed to create student' };
-  }
-};
+export const createStudent = async ({data}:typeof memberSchema) => {
+    try {
+      await prisma.member.create({ data: data });
+    } catch (error) {
+      console.log(error);
+      
+    }
+}

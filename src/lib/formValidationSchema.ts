@@ -9,7 +9,7 @@ const adminSchema = z.object({
 
 // Member schema
 const memberSchema = z.object({
-  memberId: z.number().optional(),
+  id: z.number(),
   name: z.string().min(1, "Name is required"),
   address: z.string().min(1).optional(),
   contactNumber: z.string().regex(/^[0-9]+$/, "Contact Number should contain only numbers").min(10, "Contact Number must be at least 10 digits"),

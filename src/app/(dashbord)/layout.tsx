@@ -18,17 +18,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-       <SidebarProvider>
-        <AppSidebar />
+       {/* <SidebarProvider>
+        <AppSidebar /> */}
 
       <body
         className=""
       >
-        <SidebarTrigger />
-        <MenuBar/>
+        {/* <SidebarTrigger />
+        <MenuBar/> */}
         {children}
       </body>
-      </SidebarProvider>
+      {/* </SidebarProvider> */}
     </html>
   );
 }

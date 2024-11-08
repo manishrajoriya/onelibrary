@@ -19,7 +19,7 @@ model Admin {
 model Member {
   id           Int              @id @default(autoincrement())
   name         String
-  address      String
+  address      String?
   contactNumber String
   email        String?          @unique
   admissionDate DateTime
@@ -30,15 +30,13 @@ model Member {
   followUps    FollowUp[]
   attendance   Attendance[]
   seatNumber   Int?
-  plan         Plan?            @relation(fields: [planId], references: [id])
-  planId       Int?
+  plan         Plan            @relation(fields: [planId], references: [id])
+  planId       Int
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   profileImage String?
 
-  // Additional Info
-  birthday     DateTime?
-  anniversary  DateTime?
+  
 }
 
 model Plan {
@@ -66,7 +64,7 @@ model FeeCollection {
 
 model Expense {
   id         Int       @id @default(autoincrement())
-  description String
+  description String?
   amount      Float
   date        DateTime  @default(now())
   createdAt   DateTime  @default(now())
@@ -78,7 +76,7 @@ model Reminder {
   member     Member    @relation(fields: [memberId], references: [id])
   memberId   Int
   message    String
-  dueDate    DateTime
+  dueDate    DateTime?
   createdAt  DateTime  @default(now())
 }
 

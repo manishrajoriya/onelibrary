@@ -1,167 +1,187 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+"use client";
 
-// Validation schema using Zod
-const memberSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  address: z.string().min(1,"Address is required"),
-  contactNumber: z
-    .string()
-    .min(1, "Contact number is required")
-    .regex(/^[0-9]+$/, "Contact number must be numeric"),
-  email: z.string().email("Invalid email format").optional(),
-  admissionDate: z.date({ required_error: "Admission date is required" }),
-  expiryDate: z.date({ required_error: "Expiry date is required" }),
-  seatNumber: z.number().optional(),
-  birthday: z.date().optional(),
-  anniversary: z.date().optional(),
-  profileImage: z.string().optional(),
-});
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import InputField from "./InputField";
+import Image from "next/image";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { memberSchema } from "@/lib/formValidationSchema";
+import { useFormState } from "react-dom";
+import {
+  createStudent,
+  
+  
+  
+} from "@/lib/actions";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { CldUploadWidget } from "next-cloudinary";
 
-// Convert Zod schema into TypeScript type
-export type MemberFormData = z.infer<typeof memberSchema>;
-
-export default function MemberForm({ onSubmit, defaultValues = {} }) {
+const StudentForm = ({
+  type,
+  data,
+//   setOpen,
+  relatedData,
+}: {
+  type: "create" | "update";
+  data?: any;
+//   setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
+}) => {
   const {
     register,
     handleSubmit,
-    control,
     formState: { errors },
-  } = useForm<MemberFormData>({
-    defaultValues,
+  } = useForm<typeof memberSchema>({
     resolver: zodResolver(memberSchema),
   });
 
+  const [img, setImg] = useState<any>();
+
+//   const [state, formAction] = useFormState(
+//     type === "create" ? createStudent : updateStudent,
+//     {
+//       success: false,
+//       error: false,
+//     }
+//   );
+
+  const onSubmit = handleSubmit((data) => {
+    console.log("hello");
+    console.log(data);
+    // formAction( );
+  });
+
+//   const router = useRouter();
+
+//   useEffect(() => {
+//     if (state.success) {
+//       toast(`Student has been ${type === "create" ? "created" : "updated"}!`);
+//       setOpen(false);
+//       router.refresh();
+//     }
+//   }, [state, router, type, setOpen]);
+
+//   const { grades, classes } = relatedData;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md mx-auto">
-      <div>
-        <label className="block mb-1">Name</label>
-        <input
-          {...register("name")}
-          type="text"
-          className="w-full border rounded p-2"
+    <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+      <h1 className="text-xl font-semibold">
+        {type === "create" ? "Create a new student" : "Update the student"}
+      </h1>
+      <span className="text-xs text-gray-400 font-medium">
+        Authentication Information
+      </span>
+      <div className="flex justify-between flex-wrap gap-4">
+        <InputField
+          label="Name"
+          name="Full Name"
+          defaultValue={data?.name}
+          register={register}
+        //   error={errors?.name}
         />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-      </div>
-
-      <div>
-        <label className="block mb-1">Address</label>
-        <input
-          {...register("address")}
-          type="text"
-          className="w-full border rounded p-2"
+        <InputField
+          label="Address"
+          name="Address"
+          defaultValue={data?.address}
+          register={register}
+        //   error={errors?.address}
         />
-        {errors.address && <p className="text-red-500 text-sm">{errors.address.message}</p>}
-      </div>
-
-      <div>
-        <label className="block mb-1">Contact Number</label>
-        <input
-          {...register("contactNumber")}
-          type="text"
-          className="w-full border rounded p-2"
+        <InputField
+          label="Phone"
+          name="Phone Number"
+          
+          defaultValue={data?.contactNumber}
+          register={register}
+        //   error={errors?.contactNumber}
         />
-        {errors.contactNumber && <p className="text-red-500 text-sm">{errors.contactNumber.message}</p>}
       </div>
-
-      <div>
-        <label className="block mb-1">Email</label>
-        <input
-          {...register("email")}
-          type="email"
-          className="w-full border rounded p-2"
+      <span className="text-xs text-gray-400 font-medium">
+        Personal Information
+      </span>
+      {/* <CldUploadWidget
+        uploadPreset="school"
+        onSuccess={(result, { widget }) => {
+          setImg(result.info);
+          widget.close();
+        }}
+      >
+        {({ open }) => {
+          return (
+            <div
+              className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
+              onClick={() => open()}
+            >
+              <Image src="/upload.png" alt="" width={28} height={28} />
+              <span>Upload a photo</span>
+            </div>
+          );
+        }}
+      </CldUploadWidget> */}
+      <div className="flex justify-between flex-wrap gap-4">
+        <InputField
+          label="Addmission Date"
+          name="Addmission Date"
+          defaultValue={data?.admissionDate}
+          register={register}
+        //   error={errors.admissionDate}
         />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-      </div>
-
-      <div>
-        <label className="block mb-1">Admission Date</label>
-        <Controller
-          control={control}
-          name="admissionDate"
-          render={({ field }) => (
-            <DatePicker
-              selected={field.value}
-              onChange={(date) => field.onChange(date)}
-              className="w-full border rounded p-2"
-            />
+        <InputField
+          label="Expiry Date"
+          name="Expiry Date"
+          defaultValue={data?.expiryDate}
+          register={register}
+        //   error={errors.expiryDate}
+        />
+        <InputField
+          label="Seat Number"
+          name="Seat Number"
+          defaultValue={data?.seatNumber}
+          register={register}
+        //   error={errors.seatNumber}
+        />
+        <InputField
+          label="Plan"
+          name="Plan"
+          defaultValue={data?.plan}
+          register={register}
+        //   error={errors.plan}
+        />
+        
+        
+        {data && (
+          <InputField
+            label="Id"
+            name="id"
+            defaultValue={data?.id}
+            register={register}
+            // error={errors?.id}
+            hidden
+          />
+        )}
+        {/* <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Sex</label>
+          <select
+            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            {...register("sex")}
+            defaultValue={data?.sex}
+          >
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+          </select>
+          {errors.sex?.message && (
+            <p className="text-xs text-red-400">
+              {errors.sex.message.toString()}
+            </p>
           )}
-        />
-        {errors.admissionDate && <p className="text-red-500 text-sm">{errors.admissionDate.message}</p>}
-      </div>
-
-      <div>
-        <label className="block mb-1">Expiry Date</label>
-        <Controller
-          control={control}
-          name="expiryDate"
-          render={({ field }) => (
-            <DatePicker
-              selected={field.value}
-              onChange={(date) => field.onChange(date)}
-              className="w-full border rounded p-2"
-            />
-          )}
-        />
-        {errors.expiryDate && <p className="text-red-500 text-sm">{errors.expiryDate.message}</p>}
-      </div>
-
-      <div>
-        <label className="block mb-1">Seat Number</label>
-        <input
-          {...register("seatNumber")}
-          type="Number"
-          className="w-full border rounded p-2"
-        />
-        {errors.seatNumber && <p className="text-red-500 text-sm">{errors.seatNumber.message}</p>}
-      </div>
-
-      <div>
-        <label className="block mb-1">Birthday</label>
-        <Controller
-          control={control}
-          name="birthday"
-          render={({ field }) => (
-            <DatePicker
-              selected={field.value}
-              onChange={(date) => field.onChange(date)}
-              className="w-full border rounded p-2"
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="block mb-1">Anniversary</label>
-        <Controller
-          control={control}
-          name="anniversary"
-          render={({ field }) => (
-            <DatePicker
-              selected={field.value}
-              onChange={(date) => field.onChange(date)}
-              className="w-full border rounded p-2"
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="block mb-1">Profile Image URL</label>
-        <input
-          {...register("profileImage")}
-          type="text"
-          className="w-full border rounded p-2"
-        />
-      </div>
-
-      <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-        Submit
+        </div> */}
+        
+          </div>
+      <button type="submit" onClick={onSubmit} className="bg-blue-400 text-white p-2 rounded-md">
+        {type === "create" ? "Create" : "Update"}
       </button>
     </form>
   );
-}
+};
+
+export default StudentForm;
