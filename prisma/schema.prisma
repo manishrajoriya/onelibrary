@@ -7,45 +7,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Configuration {
-  id              String        @id
-  width           Int
-  height          Int
-  croppedImageUrl String?
-  imageUrl        String
-  color           CaseColor?
-  finish          CaseFinish?
-  material        CaseMaterial?
-  model           PhoneModel?
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum CaseColor {
-  black
-  blue
-  rose
+model Member {
+  id           Int              @id @default(autoincrement())
+  name         String
+  address      String
+  contactNumber String
+  email        String?          @unique
+  admissionDate DateTime
+  expiryDate   DateTime
+  status       MemberStatus     @default(LIVE)
+  fees         FeeCollection[]
+  reminders    Reminder[]
+  followUps    FollowUp[]
+  attendance   Attendance[]
+  seatNumber   Int?
+  plan         Plan?            @relation(fields: [planId], references: [id])
+  planId       Int?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  profileImage String?
+
+  // Additional Info
+  birthday     DateTime?
+  anniversary  DateTime?
 }
 
-enum CaseFinish {
-  smooth
-  textured
+model Plan {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String?
+  duration     Int       // Duration in days
+  amount       Float
+  members      Member[]
+  createdAt    DateTime  @default(now())
 }
 
-enum CaseMaterial {
-  silicone
-  polycarbonate
+model FeeCollection {
+  id          Int       @id @default(autoincrement())
+  member      Member    @relation(fields: [memberId], references: [id])
+  memberId    Int
+  amountPaid  Float
+  totalAmount Float
+  dueAmount   Float
+  dueDate     DateTime
+  status      FeeStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
-enum OrderStatus {
-  fulfilled
-  shipped
-  awaiting_shipment
+model Expense {
+  id         Int       @id @default(autoincrement())
+  description String
+  amount      Float
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
-enum PhoneModel {
-  iphonex
-  iphone11
-  iphone12
-  iphone13
-  iphone14
-  iphone15
+model Reminder {
+  id         Int       @id @default(autoincrement())
+  member     Member    @relation(fields: [memberId], references: [id])
+  memberId   Int
+  message    String
+  dueDate    DateTime
+  createdAt  DateTime  @default(now())
+}
+
+model FollowUp {
+  id         Int       @id @default(autoincrement())
+  member     Member    @relation(fields: [memberId], references: [id])
+  memberId   Int
+  followUpDate DateTime
+  createdAt  DateTime  @default(now())
+}
+
+model Attendance {
+  id         Int       @id @default(autoincrement())
+  member     Member    @relation(fields: [memberId], references: [id])
+  memberId   Int
+  date       DateTime  @default(now())
+  status     AttendanceStatus
+  createdAt  DateTime  @default(now())
+}
+
+enum MemberStatus {
+  LIVE
+  EXPIRED
+}
+
+enum FeeStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
 }
